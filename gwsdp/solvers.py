@@ -6,8 +6,7 @@ from scipy import sparse
 from tqdm import tqdm
 
 from gwsdp.fast_cost_tensor import cost_tensor
-from gwsdp.utils import (cost_tensor_numpy, gw_from_tensor_cost,
-                         sinkhorn_scaling)
+
 
 
 def solve_gw_sdp(C1, C2, p, q, solver='SCS', max_iters=10000,

@@ -1,5 +1,5 @@
 import numpy as np
-from sdpgw.fast_cost_tensor import cost_tensor
+from gwsdp.fast_cost_tensor import cost_tensor
 
 
 def is_symmetric(matrix):
