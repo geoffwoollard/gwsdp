@@ -7,10 +7,8 @@ from tqdm import tqdm
 
 from gwsdp.fast_cost_tensor import cost_tensor
 
-
-
 def solve_gw_sdp(C1, C2, p, q, solver='SCS', max_iters=10000,
-                 verbose=False, tol=1e-5):
+                 verbose=False, tol=1e-5,warm_start=True):
     # Problem size
     m = p.size
     n = q.size
@@ -55,10 +53,19 @@ def solve_gw_sdp(C1, C2, p, q, solver='SCS', max_iters=10000,
 
     # solve the problem
     prob = cp.Problem(cp.Minimize(cp.trace(L @ P.T)), constraints)
-    if solver == 'scs':
+    if solver == 'SCS':
+        assert cp.SCS == solver
         prob.solve(solver=cp.SCS, verbose=verbose,
                    max_iters=max_iters, eps=tol)
-    elif solver == 'mosek':
+    elif solver == 'CLARABEL':
+        assert cp.CLARABEL == solver
+        prob.solve(solver=cp.CLARABEL, max_iter=max_iters, verbose=verbose, warm_start=warm_start)
+    elif solver == 'CVXOPT':
+        assert cp.CVXOPT == solver
+        prob.solve(solver=cp.CVXOPT, verbose=verbose,
+                   max_iters=max_iters, eps=tol)
+    elif solver == 'MOSEK':
+        assert cp.MOSEK == solver
         prob.solve(solver=cp.MOSEK, verbose=verbose,
                    mosek_params={'MSK_IPAR_BI_MAX_ITERATIONS': max_iters,
                                  'MSK_IPAR_INTPNT_MAX_ITERATIONS': max_iters,
@@ -66,7 +73,7 @@ def solve_gw_sdp(C1, C2, p, q, solver='SCS', max_iters=10000,
     else:
         raise TypeError('Solver is not supported.')
 
-    return Pi.value, P.value, prob.value
+    return Pi.value, P.value, prob.value, prob
 
 
 def solve_fused_gw_sdp(M, C1, C2, p, q, alpha=0.5, max_iters=10000, tol=1e-5,

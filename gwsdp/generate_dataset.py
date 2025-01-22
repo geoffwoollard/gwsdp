@@ -5,6 +5,35 @@ import scipy as sp
 from networkx.generators.community import stochastic_block_model as sbm
 
 
+def generate_sample_preturb(
+        n,
+        seed=0,
+        scale=0.1,
+        dim=3,
+        ):
+    """Based on
+    https://pythonot.github.io/auto_examples/gromov/plot_gromov.html. Sample two
+    Gaussian distributions (in 2D and 3D) and its Euclidean cost matrices, then
+    convert to float16 to save memory.
+    """
+
+    mu = np.zeros(dim)
+    cov = np.eye(dim)
+    P = sp.linalg.sqrtm(cov)
+    xt = np.random.randn(n, dim).dot(P) + mu
+    xs = np.random.normal(xt,scale)
+
+    # Distance matrices
+    C1 = sp.spatial.distance.cdist(xs, xs).astype(np.float32)
+    C2 = sp.spatial.distance.cdist(xt, xt).astype(np.float32)
+
+    # Generate uniform measures
+    p = ot.unif(n)
+    q = ot.unif(n)
+
+    return C1, C2, p, q, xs, xt
+
+
 def generate_sample(
         n1,
         n2,
